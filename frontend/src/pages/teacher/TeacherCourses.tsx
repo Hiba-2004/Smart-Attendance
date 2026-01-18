@@ -75,15 +75,19 @@ const TeacherCourses: React.FC = () => {
 
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
 
+  const [totalStudents, setTotalStudents] = useState<number>(0);
+  const [studentsByModule, setStudentsByModule] = useState<Record<number, number>>({});
+
+
   const stats = useMemo(() => {
     // gardé simple: cours = courses.length, ressources = nb cours avec fichier
     const resources = courses.filter(c => !!c.file_path).length;
     return {
       activeCourses: courses.length,
-      students: 142, // tu peux le connecter plus tard si tu veux
+      studentsCount: totalStudents, // tu peux le connecter plus tard si tu veux
       resources,
     };
-  }, [courses]);
+  }, [courses, totalStudents]);
 
   const resetForm = () => {
     setFormData({ module_id: '', title: '', description: '' });
@@ -108,6 +112,26 @@ const TeacherCourses: React.FC = () => {
     }
   };
 
+    const loadStudentCounts = async () => {
+    try {
+      const res = await api.get<{ total_students: number; by_module: Record<string, number> }>(
+        "/api/teacher/courses/students-counts"
+      );
+
+      setTotalStudents(res.data?.total_students ?? 0);
+
+      const by: Record<number, number> = {};
+      const raw = res.data?.by_module || {};
+      for (const k of Object.keys(raw)) by[Number(k)] = Number(raw[k] ?? 0);
+
+      setStudentsByModule(by);
+    } catch {
+      setTotalStudents(0);
+      setStudentsByModule({});
+    }
+  };
+
+
   const loadCourses = async () => {
     setLoadingCourses(true);
     try {
@@ -129,6 +153,7 @@ const TeacherCourses: React.FC = () => {
   useEffect(() => {
     loadCourses();
     loadModules();
+    loadStudentCounts();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
@@ -183,6 +208,7 @@ const TeacherCourses: React.FC = () => {
       setIsCreateOpen(false);
       resetForm();
       await loadCourses();
+      await loadStudentCounts();
     } catch (e: any) {
       toast({
         title: 'Erreur',
@@ -198,6 +224,7 @@ const TeacherCourses: React.FC = () => {
     try {
       await api.delete(`/api/teacher/courses/${id}`);
       setCourses(prev => prev.filter(c => c.id !== id));
+      await loadStudentCounts();
       toast({ title: 'Supprimé', description: 'Cours supprimé.' });
     } catch (e: any) {
       toast({
@@ -207,6 +234,7 @@ const TeacherCourses: React.FC = () => {
       });
     }
   };
+
 
   const handleDownload = (courseId: number) => {
     const base = (api.defaults.baseURL || '').replace(/\/$/, '');
@@ -236,11 +264,15 @@ const TeacherCourses: React.FC = () => {
               </Button>
             </DialogTrigger>
 
-            <DialogContent className="sm:max-w-[520px]">
+            <DialogContent className="sm:max-w-[560px] max-h-[85vh] overflow-y-auto">
               <DialogHeader>
-                <DialogTitle>{editingCourse ? 'Modifier le cours' : 'Créer un nouveau cours'}</DialogTitle>
+                <DialogTitle>
+                  {editingCourse ? "Modifier le cours" : "Créer un nouveau cours"}
+                </DialogTitle>
                 <DialogDescription>
-                  {editingCourse ? 'Mettez à jour les informations du cours' : 'Renseignez les informations du nouveau cours'}
+                  {editingCourse
+                    ? "Mettez à jour les informations du cours"
+                    : "Renseignez les informations du nouveau cours"}
                 </DialogDescription>
               </DialogHeader>
 
@@ -251,18 +283,27 @@ const TeacherCourses: React.FC = () => {
                     id="module_id"
                     className="mt-1 w-full rounded-md border border-border bg-background px-3 py-2 text-sm"
                     value={String(formData.module_id)}
-                    onChange={(e) => setFormData({ ...formData, module_id: Number(e.target.value) })}
-                    disabled={loadingModules}
+                    onChange={(e) =>
+                      setFormData({ ...formData, module_id: Number(e.target.value) })
+                    }
+                    disabled={loadingModules || !!editingCourse} // optionnel: on bloque en edit si tu veux
                   >
                     <option value="">
-                      {loadingModules ? 'Chargement...' : 'Choisir un module'}
+                      {loadingModules ? "Chargement..." : "Choisir un module"}
                     </option>
                     {modules.map((m) => (
                       <option key={m.id} value={String(m.id)}>
-                        {(m.code ? `${m.code} — ` : '')}{m.name}
+                        {(m.code ? `${m.code} — ` : "")}
+                        {m.name}
                       </option>
                     ))}
                   </select>
+
+                  {editingCourse && (
+                    <p className="text-xs text-muted-foreground mt-2">
+                      (Le module n’est pas modifiable ici.)
+                    </p>
+                  )}
                 </div>
 
                 <div>
@@ -281,7 +322,9 @@ const TeacherCourses: React.FC = () => {
                     id="description"
                     placeholder="Description du cours..."
                     value={formData.description}
-                    onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+                    onChange={(e) =>
+                      setFormData({ ...formData, description: e.target.value })
+                    }
                     rows={3}
                   />
                 </div>
@@ -294,23 +337,43 @@ const TeacherCourses: React.FC = () => {
                     accept=".pdf,.zip,.rar,.doc,.docx,.ppt,.pptx,.xls,.xlsx"
                     onChange={(e) => setSelectedFile(e.target.files?.[0] || null)}
                   />
+
+                  {/* ✅ feedback propre */}
+                  {selectedFile && (
+                    <p className="text-xs text-muted-foreground mt-2 truncate">
+                      Fichier: {selectedFile.name}
+                    </p>
+                  )}
+
                   {editingCourse?.file_path && !selectedFile && (
                     <p className="text-xs text-muted-foreground mt-2">
                       Un fichier existe déjà. Sélectionne un nouveau fichier pour le remplacer.
                     </p>
                   )}
                 </div>
+
+                {/* ✅ petit espace premium avant les boutons */}
+                <div className="pt-2" />
               </div>
 
               <DialogFooter>
-                <Button variant="outline" onClick={() => setIsCreateOpen(false)} disabled={submitting}>
+                <Button
+                  variant="outline"
+                  onClick={() => setIsCreateOpen(false)}
+                  disabled={submitting}
+                >
                   Annuler
                 </Button>
                 <Button onClick={handleSubmit} disabled={submitting}>
-                  {submitting ? 'En cours...' : (editingCourse ? 'Enregistrer' : 'Créer le cours')}
+                  {submitting
+                    ? "En cours..."
+                    : editingCourse
+                      ? "Enregistrer"
+                      : "Créer le cours"}
                 </Button>
               </DialogFooter>
             </DialogContent>
+
           </Dialog>
         </div>
 
@@ -323,7 +386,7 @@ const TeacherCourses: React.FC = () => {
           </div>
           <div className="metric-card">
             <Users className="w-8 h-8 text-info mb-3" />
-            <p className="metric-value">{stats.students}</p>
+            <p className="metric-value">{stats.studentsCount}</p>
             <p className="metric-label">Étudiants inscrits</p>
           </div>
           <div className="metric-card">
@@ -382,7 +445,7 @@ const TeacherCourses: React.FC = () => {
                 <div className="p-5 space-y-4">
                   <div className="flex items-center justify-between text-sm">
                     <span className="text-muted-foreground">{semester}</span>
-                    <span className="text-muted-foreground">24 étudiants</span>
+                    <span className="text-muted-foreground">{(studentsByModule[course.module_id] ?? 0)} étudiants</span>
                   </div>
 
                   <div className="flex gap-2">

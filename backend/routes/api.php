@@ -29,6 +29,7 @@ use App\Http\Controllers\Api\Teacher\ModulesController as TeacherModulesControll
 
 use App\Http\Controllers\Api\Teacher\AnnouncementsController as TeacherAnnouncementsController;
 use App\Http\Controllers\Api\Teacher\TimetableController as TeacherTimetableController;
+use App\Http\Controllers\Api\Teacher\TeacherDashboardController;
 
 
 
@@ -163,6 +164,14 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::get('/homeworks/{homework}/submissions/download', [TeacherHomeworksController::class, 'downloadSubmissionsZip']);
         Route::post('/homeworks/{homework}/submissions/{submission}/grade', [TeacherHomeworksController::class, 'gradeSubmission']);
         Route::put('/homeworks/{homework}/submissions/{submission}/grade', [TeacherHomeworksController::class, 'gradeSubmission']);
+        Route::get('/notification-preferences', [\App\Http\Controllers\Api\Teacher\NotificationPreferencesController::class, 'show']);
+        Route::put('/notification-preferences', [\App\Http\Controllers\Api\Teacher\NotificationPreferencesController::class, 'update']);
+        Route::put('/profile', [\App\Http\Controllers\Api\Teacher\ProfileController::class, 'update']);
+        Route::get('/dashboard/stats', [TeacherDashboardController::class, 'stats']);
+        Route::get('/courses/students-counts', [\App\Http\Controllers\Api\Teacher\CoursesController::class, 'studentsCounts']);
+
+
+
 
 
     });

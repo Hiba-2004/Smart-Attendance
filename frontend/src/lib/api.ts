@@ -496,6 +496,7 @@ export interface TeacherDashboardStats {
   assignedCourses: number;
   pendingJustifications: number;
   sessionsThisWeek: number;
+  studentsCount: number;
 }
 
 // -------------------------
@@ -545,27 +546,6 @@ export const teacherJustificationsService = {
 };
 
 // Teacher dashboard helper (simple client-side compute)
-export const teacherDashboardService = {
-  getStats: async (): Promise<TeacherDashboardStats> => {
-    const [courses, justifs, todaySessions] = await Promise.all([
-      teacherCoursesService.list(),
-      teacherJustificationsService.list(),
-      teacherSessionsService.today(),
-    ]);
-
-    const pendingJustifications = justifs.filter(j => j.status === "pending").length;
-
-    // “cours cette semaine” : approximation simple = nb de séances aujourd’hui
-    // (on l’améliorera plus tard avec un endpoint week)
-    const sessionsThisWeek = todaySessions.length;
-
-    return {
-      assignedCourses: courses.length,
-      pendingJustifications,
-      sessionsThisWeek,
-    };
-  },
-};
 
 
 export type TeacherTimetableEntry = {
@@ -714,4 +694,30 @@ async downloadSubmissionsZip(homeworkId: number): Promise<Blob> {
 },
 };
 
+
+  export const teacherPreferencesService = {
+    async get(): Promise<NotificationPreferences> {
+      const res = await api.get("/api/teacher/notification-preferences");
+      return res.data;
+    },
+    async update(payload: NotificationPreferences): Promise<NotificationPreferences> {
+      const res = await api.put("/api/teacher/notification-preferences", payload);
+      return res.data;
+    },
+  };
+
+  export const teacherProfileService = {
+    async updateName(firstName: string, lastName: string) {
+      const res = await api.put("/api/teacher/profile", { firstName, lastName });
+      return res.data;
+    },
+  
+  };
+
+  export const teacherDashboardService = {
+    getStats: async (): Promise<TeacherDashboardStats> => {
+      const res = await api.get("/api/teacher/dashboard/stats");
+      return res.data as TeacherDashboardStats;
+    },
+  };
 

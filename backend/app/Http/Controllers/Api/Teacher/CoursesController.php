@@ -7,6 +7,7 @@ use App\Models\Course;
 use App\Models\Module;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\DB;
 
 class CoursesController extends Controller
 {
@@ -93,4 +94,45 @@ class CoursesController extends Controller
 
         return response()->download(Storage::disk('public')->path($course->file_path));
     }
+
+    public function studentsCounts(Request $request)
+    {
+        $teacherId = $request->user()->id;
+
+        // ✅ étudiants par module (via course_sessions -> filiere -> users)
+        $rows = DB::table('course_sessions')
+            ->join('users', function ($join) {
+                $join->on('users.filiere_id', '=', 'course_sessions.filiere_id')
+                    ->where('users.role', '=', 'student');
+            })
+            ->where('course_sessions.teacher_id', $teacherId)
+            ->whereNotNull('course_sessions.module_id')
+            ->select(
+                'course_sessions.module_id as module_id',
+                DB::raw('COUNT(DISTINCT users.id) as students_count')
+            )
+            ->groupBy('course_sessions.module_id')
+            ->get();
+
+        $byModule = [];
+        foreach ($rows as $r) {
+            $byModule[(int) $r->module_id] = (int) $r->students_count;
+        }
+
+        // ✅ total étudiants distincts sur tous les modules enseignés
+        $totalStudents = DB::table('course_sessions')
+            ->join('users', function ($join) {
+                $join->on('users.filiere_id', '=', 'course_sessions.filiere_id')
+                    ->where('users.role', '=', 'student');
+            })
+            ->where('course_sessions.teacher_id', $teacherId)
+            ->distinct('users.id')
+            ->count('users.id');
+
+        return response()->json([
+            'total_students' => (int) $totalStudents,
+            'by_module' => $byModule,
+        ]);
+    }
+
 }

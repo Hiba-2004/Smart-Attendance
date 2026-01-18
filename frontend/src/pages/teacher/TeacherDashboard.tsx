@@ -12,6 +12,7 @@ const TeacherDashboard: React.FC = () => {
     assignedCourses: 0,
     pendingJustifications: 0,
     sessionsThisWeek: 0,
+    studentsCount: 0,
   });
 
   useEffect(() => {
@@ -33,9 +34,6 @@ const TeacherDashboard: React.FC = () => {
     })();
   }, []);
 
-  // On garde le style: ton UI affichait "142 étudiants" (mock).
-  // Si tu veux un vrai chiffre, il faut un endpoint dédié (on le fera après).
-  const studentsCount = useMemo(() => 142, []);
 
   return (
     <TeacherLayout>
@@ -55,7 +53,7 @@ const TeacherDashboard: React.FC = () => {
           </div>
           <div className="metric-card">
             <Users className="w-8 h-8 text-info mb-3" />
-            <p className="metric-value">{studentsCount}</p>
+            <p className="metric-value">{stats.studentsCount}</p>
             <p className="metric-label">Étudiants</p>
           </div>
           <div className="metric-card">

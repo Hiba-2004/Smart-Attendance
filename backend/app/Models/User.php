@@ -99,6 +99,12 @@ class User extends Authenticatable
     public function isTeacher(): bool { return $this->role === 'teacher'; }
     public function isAdmin(): bool { return $this->role === 'admin'; }
 
+    public function notificationPreference()
+{
+    return $this->hasOne(\App\Models\NotificationPreference::class);
+}
+
+
     
 
 }
