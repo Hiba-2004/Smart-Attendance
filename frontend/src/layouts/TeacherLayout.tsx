@@ -1,36 +1,36 @@
-import React from 'react';
-import { Link, useLocation, useNavigate } from 'react-router-dom';
-import { useAuth } from '@/contexts/AuthContext';
-import { 
-  GraduationCap, 
-  LayoutDashboard, 
-  Calendar, 
-  Users, 
-  BookOpen, 
-  FileText, 
+import React from "react";
+import { Link, useLocation, useNavigate } from "react-router-dom";
+import { useAuth } from "@/contexts/AuthContext";
+import {
+  GraduationCap,
+  LayoutDashboard,
+  Calendar,
+  Users,
+  BookOpen,
+  FileText,
   Bell,
   QrCode,
   ClipboardCheck,
   LogOut,
   Menu,
-  X
-} from 'lucide-react';
-import { Button } from '@/components/ui/button';
-import { cn } from '@/lib/utils';
+  X,
+} from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { cn } from "@/lib/utils";
 
 interface TeacherLayoutProps {
   children: React.ReactNode;
 }
 
 const navItems = [
-  { href: '/teacher', label: 'Tableau de bord', icon: LayoutDashboard },
-  { href: '/teacher/timetable', label: 'Emploi du temps', icon: Calendar },
-  { href: '/teacher/attendance', label: 'Gestion présences', icon: QrCode },
-  { href: '/teacher/justifications', label: 'Justificatifs', icon: ClipboardCheck },
-  { href: '/teacher/courses', label: 'Mes cours', icon: BookOpen },
-  { href: '/teacher/assignments', label: 'Travaux', icon: FileText },
-  { href: '/teacher/announcements', label: 'Annonces', icon: Bell },
-  { href: '/teacher/profile', label: 'Mon profil', icon: Users },
+  { href: "/teacher", label: "Tableau de bord", icon: LayoutDashboard },
+  { href: "/teacher/timetable", label: "Emploi du temps", icon: Calendar },
+  { href: "/teacher/attendance", label: "Gestion présences", icon: QrCode },
+  { href: "/teacher/justifications", label: "Justificatifs", icon: ClipboardCheck },
+  { href: "/teacher/courses", label: "Mes cours", icon: BookOpen },
+  { href: "/teacher/assignments", label: "Travaux", icon: FileText },
+  { href: "/teacher/announcements", label: "Annonces", icon: Bell },
+  { href: "/teacher/profile", label: "Mon profil", icon: Users },
 ];
 
 export const TeacherLayout: React.FC<TeacherLayoutProps> = ({ children }) => {
@@ -41,24 +41,27 @@ export const TeacherLayout: React.FC<TeacherLayoutProps> = ({ children }) => {
 
   const handleLogout = () => {
     logout();
-    navigate('/login');
+    navigate("/login");
   };
 
   return (
-    <div className="min-h-screen flex bg-background">
+    // ✅ IMPORTANT: lock the page scroll, keep layout height fixed
+    <div className="h-svh overflow-hidden flex bg-background">
       {/* Mobile Sidebar Overlay */}
       {sidebarOpen && (
-        <div 
+        <div
           className="fixed inset-0 bg-foreground/50 z-40 lg:hidden"
           onClick={() => setSidebarOpen(false)}
         />
       )}
 
       {/* Sidebar */}
-      <aside className={cn(
-        "fixed inset-y-0 left-0 z-50 w-64 bg-sidebar text-sidebar-foreground transform transition-transform duration-200 lg:translate-x-0 lg:static",
-        sidebarOpen ? "translate-x-0" : "-translate-x-full"
-      )}>
+      <aside
+        className={cn(
+          "fixed inset-y-0 left-0 z-50 w-64 bg-sidebar text-sidebar-foreground transform transition-transform duration-200 lg:translate-x-0 lg:static",
+          sidebarOpen ? "translate-x-0" : "-translate-x-full"
+        )}
+      >
         <div className="flex flex-col h-full">
           {/* Logo */}
           <div className="p-4 border-b border-sidebar-border">
@@ -67,8 +70,12 @@ export const TeacherLayout: React.FC<TeacherLayoutProps> = ({ children }) => {
                 <GraduationCap className="w-6 h-6 text-sidebar-primary-foreground" />
               </div>
               <div>
-                <span className="font-serif text-lg text-sidebar-foreground">Smart Campus</span>
-                <span className="block text-xs text-sidebar-foreground/60">Portail Enseignant</span>
+                <span className="font-serif text-lg text-sidebar-foreground">
+                  Smart Campus
+                </span>
+                <span className="block text-xs text-sidebar-foreground/60">
+                  Portail Enseignant
+                </span>
               </div>
             </Link>
           </div>
@@ -84,8 +91,8 @@ export const TeacherLayout: React.FC<TeacherLayoutProps> = ({ children }) => {
                   onClick={() => setSidebarOpen(false)}
                   className={cn(
                     "flex items-center gap-3 px-3 py-2.5 rounded-md text-sm transition-colors",
-                    isActive 
-                      ? "bg-sidebar-accent text-sidebar-accent-foreground font-medium" 
+                    isActive
+                      ? "bg-sidebar-accent text-sidebar-accent-foreground font-medium"
                       : "text-sidebar-foreground/70 hover:bg-sidebar-accent/50 hover:text-sidebar-foreground"
                   )}
                 >
@@ -101,7 +108,8 @@ export const TeacherLayout: React.FC<TeacherLayoutProps> = ({ children }) => {
             <div className="flex items-center gap-3 mb-4 px-2">
               <div className="w-9 h-9 rounded-full bg-sidebar-accent flex items-center justify-center">
                 <span className="text-sm font-medium text-sidebar-accent-foreground">
-                  {user?.firstName?.[0]}{user?.lastName?.[0]}
+                  {user?.firstName?.[0]}
+                  {user?.lastName?.[0]}
                 </span>
               </div>
               <div className="flex-1 min-w-0">
@@ -113,8 +121,9 @@ export const TeacherLayout: React.FC<TeacherLayoutProps> = ({ children }) => {
                 </p>
               </div>
             </div>
-            <Button 
-              variant="ghost" 
+
+            <Button
+              variant="ghost"
               className="w-full justify-start text-sidebar-foreground/70 hover:text-sidebar-foreground hover:bg-sidebar-accent/50"
               onClick={handleLogout}
             >
@@ -126,17 +135,17 @@ export const TeacherLayout: React.FC<TeacherLayoutProps> = ({ children }) => {
       </aside>
 
       {/* Main Content */}
-      <div className="flex-1 flex flex-col min-w-0">
-        {/* Top Bar */}
-        <header className="sticky top-0 z-30 bg-card border-b border-border">
+      <div className="flex-1 min-w-0 flex flex-col">
+        {/* ✅ Top Bar fixed */}
+        <header className="sticky top-0 z-40 border-b border-border bg-card/80 backdrop-blur">
           <div className="flex items-center justify-between h-14 px-4 lg:px-6">
-            <button 
+            <button
               className="lg:hidden p-2 -ml-2 rounded-md hover:bg-muted"
               onClick={() => setSidebarOpen(!sidebarOpen)}
             >
               {sidebarOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
             </button>
-            
+
             <div className="hidden lg:block">
               <h1 className="text-sm font-medium text-foreground">
                 Bienvenue, {user?.firstName}
@@ -145,19 +154,19 @@ export const TeacherLayout: React.FC<TeacherLayoutProps> = ({ children }) => {
 
             <div className="flex items-center gap-4">
               <span className="text-xs text-muted-foreground">
-                {new Date().toLocaleDateString('fr-FR', { 
-                  weekday: 'long', 
-                  year: 'numeric', 
-                  month: 'long', 
-                  day: 'numeric' 
+                {new Date().toLocaleDateString("fr-FR", {
+                  weekday: "long",
+                  year: "numeric",
+                  month: "long",
+                  day: "numeric",
                 })}
               </span>
             </div>
           </div>
         </header>
 
-        {/* Page Content */}
-        <main className="flex-1 p-4 lg:p-6 overflow-auto">
+        {/* ✅ ONLY this area scrolls */}
+        <main className="flex-1 overflow-y-auto p-4 lg:p-6">
           {children}
         </main>
       </div>

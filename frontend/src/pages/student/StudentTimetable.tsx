@@ -10,11 +10,11 @@ const days = ['Lundi', 'Mardi', 'Mercredi', 'Jeudi', 'Vendredi'] as const;
 const dayKeys = ['monday', 'tuesday', 'wednesday', 'thursday', 'friday'] as const;
 
 const timeSlots = [
-  { start: '08:00', end: '10:00', label: '08h - 10h' },
-  { start: '10:00', end: '12:00', label: '10h - 12h' },
-  { start: '12:00', end: '14:00', label: '12h - 14h' },
-  { start: '14:00', end: '16:00', label: '14h - 16h' },
-  { start: '16:00', end: '18:00', label: '16h - 18h' },
+  { start: '08:30', end: '10:30', label: '08:30 - 10:30' },
+  { start: '10:45', end: '12:30', label: '10:45 - 12:30' },
+  { start: '12:30', end: '14:30', label: '12:30 - 14:30' },
+  { start: '14:30', end: '16:30', label: '14:30 - 16:30' },
+  { start: '16:45', end: '18:30', label: '16:45 - 18:30' },
 ];
 
 const StudentTimetable: React.FC = () => {

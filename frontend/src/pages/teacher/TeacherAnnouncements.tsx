@@ -320,184 +320,188 @@ const TeacherAnnouncements: React.FC = () => {
               </Button>
             </DialogTrigger>
 
-            <DialogContent className="sm:max-w-[600px] max-h-[85vh] overflow-hidden">
-              <DialogHeader>
-                <DialogTitle>{editing ? "Modifier l'annonce" : 'Créer une annonce'}</DialogTitle>
-                <DialogDescription>
-                  Choisissez le type d'annonce et complétez les informations
-                </DialogDescription>
-              </DialogHeader>
-            <div className="max-h-[70vh] overflow-y-auto pr-2">
-              {/* Announcement Type Selection (style conservé) */}
-              <div className="grid grid-cols-4 gap-2 py-4  rounded-lg">
-                <button
-                  className={`p-3 rounded-lg border text-center transition-colors ${
-                    announcementType === 'general'
-                      ? 'border-primary bg-primary/10'
-                      : 'border-border hover:bg-muted/50'
-                  }`}
-                  onClick={() => setAnnouncementType('general')}
-                  type="button"
-                >
-                  <Megaphone className="w-5 h-5 mx-auto mb-1 text-primary" />
-                  <span className="text-xs">Général</span>
-                </button>
+      <DialogContent className="sm:max-w-[720px] max-h-[85vh] overflow-hidden p-0">
+        {/* Header fixe */}
+        <div className="p-6 pb-4 border-b border-border">
+          <DialogHeader>
+            <DialogTitle>{editing ? "Modifier l'annonce" : "Créer une annonce"}</DialogTitle>
+            <DialogDescription>
+              Choisissez le type d'annonce et complétez les informations
+            </DialogDescription>
+          </DialogHeader>
+        </div>
 
-                <button
-                  className={`p-3 rounded-lg border text-center transition-colors ${
-                    announcementType === 'cancellation'
-                      ? 'border-destructive bg-destructive/10'
-                      : 'border-border hover:bg-muted/50'
-                  }`}
-                  onClick={() => setAnnouncementType('cancellation')}
-                  type="button"
-                >
-                  <XCircle className="w-5 h-5 mx-auto mb-1 text-destructive" />
-                  <span className="text-xs">Annulation</span>
-                </button>
+        {/* Body scroll */}
+        <div className="px-6 py-4 overflow-y-auto max-h-[calc(85vh-168px)]">
+          {/* Announcement Type Selection (style conservé) */}
+          <div className="grid grid-cols-4 gap-2 mb-5">
+            <button
+              className={`p-3 rounded-lg border text-center transition-colors ${
+                announcementType === 'general'
+                  ? 'border-primary bg-primary/10'
+                  : 'border-border hover:bg-muted/50'
+              }`}
+              onClick={() => setAnnouncementType('general')}
+              type="button"
+            >
+              <Megaphone className="w-5 h-5 mx-auto mb-1 text-primary" />
+              <span className="text-xs">Général</span>
+            </button>
 
-                <button
-                  className={`p-3 rounded-lg border text-center transition-colors ${
-                    announcementType === 'reschedule'
-                      ? 'border-warning bg-warning/10'
-                      : 'border-border hover:bg-muted/50'
-                  }`}
-                  onClick={() => setAnnouncementType('reschedule')}
-                  type="button"
-                >
-                  <RefreshCw className="w-5 h-5 mx-auto mb-1 text-warning" />
-                  <span className="text-xs">Report</span>
-                </button>
+            <button
+              className={`p-3 rounded-lg border text-center transition-colors ${
+                announcementType === 'cancellation'
+                  ? 'border-destructive bg-destructive/10'
+                  : 'border-border hover:bg-muted/50'
+              }`}
+              onClick={() => setAnnouncementType('cancellation')}
+              type="button"
+            >
+              <XCircle className="w-5 h-5 mx-auto mb-1 text-destructive" />
+              <span className="text-xs">Annulation</span>
+            </button>
 
-                <button
-                  className={`p-3 rounded-lg border text-center transition-colors ${
-                    announcementType === 'event'
-                      ? 'border-info bg-info/10'
-                      : 'border-border hover:bg-muted/50'
-                  }`}
-                  onClick={() => setAnnouncementType('event')}
-                  type="button"
+            <button
+              className={`p-3 rounded-lg border text-center transition-colors ${
+                announcementType === 'reschedule'
+                  ? 'border-warning bg-warning/10'
+                  : 'border-border hover:bg-muted/50'
+              }`}
+              onClick={() => setAnnouncementType('reschedule')}
+              type="button"
+            >
+              <RefreshCw className="w-5 h-5 mx-auto mb-1 text-warning" />
+              <span className="text-xs">Report</span>
+            </button>
+
+            <button
+              className={`p-3 rounded-lg border text-center transition-colors ${
+                announcementType === 'event'
+                  ? 'border-info bg-info/10'
+                  : 'border-border hover:bg-muted/50'
+              }`}
+              onClick={() => setAnnouncementType('event')}
+              type="button"
+            >
+              <Calendar className="w-5 h-5 mx-auto mb-1 text-info" />
+              <span className="text-xs">Événement</span>
+            </button>
+          </div>
+
+          <div className="space-y-4">
+            {(announcementType === 'cancellation' || announcementType === 'reschedule') && (
+              <div>
+                <Label>Cours concerné</Label>
+                <Select
+                  value={formData.courseCode}
+                  onValueChange={(v) => setFormData({ ...formData, courseCode: v })}
+                  disabled={loadingModules}
                 >
-                  <Calendar className="w-5 h-5 mx-auto mb-1 text-info" />
-                  <span className="text-xs">Événement</span>
-                </button>
+                  <SelectTrigger className="mt-1">
+                    <SelectValue placeholder={loadingModules ? 'Chargement...' : 'Sélectionner un cours'} />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {modules.map((m) => (
+                      <SelectItem key={m.id} value={m.code || String(m.id)}>
+                        {(m.code ? `${m.code} - ` : '')}{m.name}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
               </div>
+            )}
 
-              <div className="space-y-4">
-                {/* cours concerné: on utilise modules (réels) */}
-                {(announcementType === 'cancellation' || announcementType === 'reschedule') && (
-                  <div>
-                    <Label>Cours concerné</Label>
-                    <Select
-                      value={formData.courseCode}
-                      onValueChange={(v) => setFormData({ ...formData, courseCode: v })}
-                      disabled={loadingModules}
-                    >
-                      <SelectTrigger className="mt-1">
-                        <SelectValue placeholder={loadingModules ? 'Chargement...' : 'Sélectionner un cours'} />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {modules.map((m) => (
-                          <SelectItem key={m.id} value={m.code || String(m.id)}>
-                            {(m.code ? `${m.code} - ` : '')}{m.name}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                  </div>
-                )}
-
-                {announcementType === 'reschedule' && (
-                  <div className="grid grid-cols-2 gap-4">
-                    <div>
-                      <Label htmlFor="newDate">Nouvelle date</Label>
-                      <Input
-                        id="newDate"
-                        type="date"
-                        className="mt-1"
-                        value={formData.newDate}
-                        onChange={(e) => setFormData({ ...formData, newDate: e.target.value })}
-                      />
-                    </div>
-                    <div>
-                      <Label htmlFor="newTime">Nouvelle heure</Label>
-                      <Input
-                        id="newTime"
-                        type="time"
-                        className="mt-1"
-                        value={formData.newTime}
-                        onChange={(e) => setFormData({ ...formData, newTime: e.target.value })}
-                      />
-                    </div>
-                  </div>
-                )}
-
+            {announcementType === 'reschedule' && (
+              <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <Label htmlFor="title">Titre de l'annonce</Label>
+                  <Label htmlFor="newDate">Nouvelle date</Label>
                   <Input
-                    id="title"
+                    id="newDate"
+                    type="date"
                     className="mt-1"
-                    placeholder={
-                      announcementType === 'cancellation' ? "Annulation du cours..." :
-                      announcementType === 'reschedule' ? "Report du cours..." :
-                      announcementType === 'event' ? "Événement : ..." :
-                      "Titre de l'annonce"
-                    }
-                    value={formData.title}
-                    onChange={(e) => setFormData({ ...formData, title: e.target.value })}
+                    value={formData.newDate}
+                    onChange={(e) => setFormData({ ...formData, newDate: e.target.value })}
                   />
                 </div>
-
                 <div>
-                  <Label htmlFor="content">Contenu</Label>
-                  <Textarea
-                    id="content"
-                    className="mt-1"
-                    placeholder="Détails de l'annonce..."
-                    value={formData.content}
-                    onChange={(e) => setFormData({ ...formData, content: e.target.value })}
-                    rows={4}
-                  />
-                </div>
-
-                {/* Optionnel: filiere_id (si tu veux cibler une filière) */}
-                <div>
-                  <Label htmlFor="filiere_id">Cibler une filière (optionnel)</Label>
+                  <Label htmlFor="newTime">Nouvelle heure</Label>
                   <Input
-                    id="filiere_id"
+                    id="newTime"
+                    type="time"
                     className="mt-1"
-                    type="number"
-                    placeholder="Ex: 1"
-                    value={String(formData.filiere_id)}
-                    onChange={(e) => setFormData({ ...formData, filiere_id: e.target.value })}
-                  />
-                  <p className="text-xs text-muted-foreground mt-1">
-                    Laisse vide pour annonce générale.
-                  </p>
-                </div>
-
-                <div>
-                  <Label htmlFor="image">Image (optionnel)</Label>
-                  <Input
-                    id="image"
-                    type="file"
-                    accept=".jpg,.jpeg,.png,.webp"
-                    onChange={(e) => setSelectedImage(e.target.files?.[0] || null)}
+                    value={formData.newTime}
+                    onChange={(e) => setFormData({ ...formData, newTime: e.target.value })}
                   />
                 </div>
               </div>
+            )}
 
-              <DialogFooter className="mt-4">
-                <Button variant="outline" onClick={() => setIsCreateOpen(false)} disabled={submitting}>
-                  Annuler
-                </Button>
-                <Button onClick={handleSubmit} disabled={submitting}>
-                  {submitting ? 'En cours...' : (editing ? 'Enregistrer' : "Publier l'annonce")}
-                </Button>
-              </DialogFooter>
+            <div>
+              <Label htmlFor="title">Titre de l'annonce</Label>
+              <Input
+                id="title"
+                className="mt-1"
+                placeholder={
+                  announcementType === 'cancellation' ? "Annulation du cours..." :
+                  announcementType === 'reschedule' ? "Report du cours..." :
+                  announcementType === 'event' ? "Événement : ..." :
+                  "Titre de l'annonce"
+                }
+                value={formData.title}
+                onChange={(e) => setFormData({ ...formData, title: e.target.value })}
+              />
             </div>
-            </DialogContent>
-          </Dialog>
+
+            <div>
+              <Label htmlFor="content">Contenu</Label>
+              <Textarea
+                id="content"
+                className="mt-1 resize-none"
+                placeholder="Détails de l'annonce..."
+                value={formData.content}
+                onChange={(e) => setFormData({ ...formData, content: e.target.value })}
+                rows={5}
+              />
+            </div>
+
+            <div>
+              <Label htmlFor="filiere_id">Cibler une filière (optionnel)</Label>
+              <Input
+                id="filiere_id"
+                className="mt-1 h-10"
+                type="number"
+                placeholder="ID filière (ex: 1)"
+                value={String(formData.filiere_id)}
+                onChange={(e) => setFormData({ ...formData, filiere_id: e.target.value })}
+              />
+              <p className="text-xs text-muted-foreground mt-1">
+                Laisse vide pour annonce générale.
+              </p>
+            </div>
+
+            <div>
+              <Label htmlFor="image">Image (optionnel)</Label>
+              <Input
+                id="image"
+                type="file"
+                accept=".jpg,.jpeg,.png,.webp"
+                onChange={(e) => setSelectedImage(e.target.files?.[0] || null)}
+              />
+            </div>
+          </div>
+        </div>
+
+        {/* Footer fixe */}
+        <div className="p-6 pt-4 border-t border-border flex justify-end gap-2">
+          <Button variant="outline" onClick={() => setIsCreateOpen(false)} disabled={submitting}>
+            Annuler
+          </Button>
+          <Button onClick={handleSubmit} disabled={submitting}>
+            {submitting ? 'En cours...' : (editing ? 'Enregistrer' : "Publier l'annonce")}
+          </Button>
+        </div>
+      </DialogContent>
+         </Dialog>
         </div>
 
         {/* Quick Actions (style conservé) */}

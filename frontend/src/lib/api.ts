@@ -568,3 +568,150 @@ export const teacherDashboardService = {
 };
 
 
+export type TeacherTimetableEntry = {
+  id: number;
+  day: string;        // monday.. saturday
+  startTime: string;  // "08:30"
+  endTime: string;    // "10:30"
+  room: string;
+  type: string;       // lecture | tutorial | lab
+  course: string;
+  courseCode?: string | null;
+};
+
+export const teacherTimetableService = {
+  async getAll(): Promise<TeacherTimetableEntry[]> {
+    const res = await api.get("/api/teacher/timetable");
+    return Array.isArray(res.data) ? res.data : (res.data?.data ?? []);
+  },
+
+  async downloadPdf(): Promise<Blob> {
+    const res = await api.get("/api/teacher/timetable/pdf", { responseType: "blob" });
+    return res.data as Blob;
+  },
+};
+
+export type TeacherCourseOption = {
+  id: number;
+  code: string;
+  name: string;
+};
+
+export type TeacherAssignment = {
+  id: number;
+  title: string;
+  courseCode: string;
+  courseName: string;
+  dueDate: string;     // ISO YYYY-MM-DD
+  maxGrade: number;
+  status: "pending" | "submitted" | "graded";
+  createdAt?: string;
+};
+
+export type CreateTeacherAssignmentPayload = {
+  title: string;
+  courseId: number;
+  dueDate: string;     // YYYY-MM-DD
+  maxGrade: number;
+  description?: string;
+};
+
+export const teacherAssignmentsService = {
+  async getCourses(): Promise<TeacherCourseOption[]> {
+    const { data } = await api.get("/teacher/courses");
+    return data;
+  },
+
+  async getAll(): Promise<TeacherAssignment[]> {
+    const { data } = await api.get("/teacher/assignments");
+    return data;
+  },
+
+  async create(payload: CreateTeacherAssignmentPayload): Promise<TeacherAssignment> {
+    const { data } = await api.post("/teacher/assignments", payload);
+    return data;
+  },
+
+  async remove(id: number): Promise<void> {
+    await api.delete(`/teacher/assignments/${id}`);
+  },
+
+  async downloadSubmissionsZip(assignmentId: number): Promise<Blob> {
+    const res = await api.get(`/teacher/assignments/${assignmentId}/download`, { responseType: "blob" });
+    return res.data;
+  },
+};
+
+export type TeacherModuleOption = {
+  id: number;
+  name: string;
+};
+
+export type TeacherHomework = {
+  id: number;
+  title: string;
+  description?: string | null;
+  deadline: string; // ISO datetime
+  file_path?: string | null;
+  module: { id: number; name: string };
+
+  submissions_count?: number;
+  graded_count?: number;
+};
+
+type Paginated<T> = {
+  data: T[];
+  current_page: number;
+  last_page: number;
+  per_page: number;
+  total: number;
+};
+
+export const teacherHomeworksService = {
+  async getModules(): Promise<TeacherModuleOption[]> {
+    const { data } = await api.get("/api/teacher/modules");
+    return data;
+  },
+
+  async getHomeworks(page = 1): Promise<Paginated<TeacherHomework>> {
+    const { data } = await api.get("/api/teacher/homeworks", { params: { page } });
+    return data;
+  },
+
+  async createHomework(payload: FormData): Promise<TeacherHomework> {
+    const { data } = await api.post("/api/teacher/homeworks", payload, {
+      headers: { "Content-Type": "multipart/form-data" },
+    });
+    return data;
+  },
+
+  async deleteHomework(id: number): Promise<void> {
+    await api.delete(`/api/teacher/homeworks/${id}`);
+  },
+
+  async updateHomework(id: number, payload: FormData): Promise<TeacherHomework> {
+    // Laravel accepte PUT/PATCH ; si ton backend préfère POST + _method, on gère:
+    payload.append("_method", "PUT");
+    const { data } = await api.post(`/api/teacher/homeworks/${id}`, payload, {
+      headers: { "Content-Type": "multipart/form-data" },
+    });
+    return data;
+  },
+
+  async getSubmissions(homeworkId: number, page = 1) {
+    const { data } = await api.get(`/api/teacher/homeworks/${homeworkId}/submissions`, { params: { page } });
+    return data;
+  },
+
+  async downloadHomeworkFile(homeworkId: number): Promise<Blob> {
+  const res = await api.get(`/api/teacher/homeworks/${homeworkId}/file`, { responseType: "blob" });
+  return res.data as Blob;
+},
+
+async downloadSubmissionsZip(homeworkId: number): Promise<Blob> {
+  const res = await api.get(`/api/teacher/homeworks/${homeworkId}/submissions/download`, { responseType: "blob" });
+  return res.data as Blob;
+},
+};
+
+

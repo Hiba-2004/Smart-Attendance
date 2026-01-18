@@ -28,6 +28,8 @@ use App\Http\Controllers\Api\Student\HomeworksController as StudentHomeworksCont
 use App\Http\Controllers\Api\Teacher\ModulesController as TeacherModulesController;
 
 use App\Http\Controllers\Api\Teacher\AnnouncementsController as TeacherAnnouncementsController;
+use App\Http\Controllers\Api\Teacher\TimetableController as TeacherTimetableController;
+
 
 
 /*
@@ -155,6 +157,13 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::post('/announcements', [TeacherAnnouncementsController::class, 'store']);
         Route::put('/announcements/{announcement}', [TeacherAnnouncementsController::class, 'update']);
         Route::delete('/announcements/{announcement}', [TeacherAnnouncementsController::class, 'destroy']);
+        Route::get('/timetable', [TeacherTimetableController::class, 'index']);
+        Route::get('/timetable/pdf', [TeacherTimetableController::class, 'pdf']);
+        Route::get('/homeworks/{homework}/file', [TeacherHomeworksController::class, 'downloadFile']);
+        Route::get('/homeworks/{homework}/submissions/download', [TeacherHomeworksController::class, 'downloadSubmissionsZip']);
+        Route::post('/homeworks/{homework}/submissions/{submission}/grade', [TeacherHomeworksController::class, 'gradeSubmission']);
+        Route::put('/homeworks/{homework}/submissions/{submission}/grade', [TeacherHomeworksController::class, 'gradeSubmission']);
+
 
     });
 
